@@ -1,7 +1,7 @@
 # Cahier des charges - Plateforme de gestion documentaire
 
 ## 1. Contexte
-La societe Exemple SA souhaite externaliser l'hebergement de sa plateforme documentaire.
+La societe Nordlys AB souhaite externaliser l'hebergement de sa plateforme documentaire.
 
 ## 2. Exigences fonctionnelles
 ### 2.1 Disponibilite

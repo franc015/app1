@@ -1,7 +1,7 @@
-# Offre technique - Solution DocuCloud
+# Offre technique - Solution Dokumentmoln
 
 ## 1. Presentation
-DocuCloud est une plateforme documentaire operee par la societe Prestataire SAS.
+Dokumentmoln est une plateforme documentaire operee par la societe Skogsdata AB.
 
 ## 2. Niveaux de service
 ### 2.1 Disponibilite
