@@ -4,6 +4,8 @@ Date de la session : 2026-09-29. Langue de travail de l'utilisateur : français.
 Ce document résume toute la conversation. Les éléments non connus sont marqués **À vérifier**.
 
 > **Mise à jour du 2026-09-30** : la PR de test #1 a été fusionnée dans `main` (branche par défaut, protégée) et l'ancienne branche de travail a été supprimée sur GitHub. Voir §4 (commits), la section « État GitHub » et §8-§10. Les sections 1 à 3 décrivent l'historique initial de la session.
+>
+> **Noms de branche** : à la demande de l'utilisateur, le nom de la branche de travail est remplacé par un nom suédois dans ce document. Les messages de fusion des PR #1 et #2 déjà présents dans `main` conservent le nom d'origine (l'historique de `main` n'est pas réécrit).
 
 ---
 
@@ -72,7 +74,7 @@ Python 3.11, **aucune dépendance obligatoire** ; `pypdf` uniquement pour lire l
 
 ## 4. Modifications déjà réalisées
 
-**Git** : dépôt `franc015/app1`. Le dépôt était vide au départ (aucun commit). Le travail a été fait sur `claude/nice-brahmagupta-07pin6`, puis fusionné dans `main` par la PR #1.
+**Git** : dépôt `franc015/app1`. Le dépôt était vide au départ (aucun commit). Le travail a été fait sur `claude/nice-linnaeus-07pin6`, puis fusionné dans `main` par la PR #1.
 
 | Commit | Contenu |
 |---|---|
@@ -82,7 +84,7 @@ Python 3.11, **aucune dépendance obligatoire** ; `pypdf` uniquement pour lire l
 | `1e64c1d` | Workflow GitHub Actions `.github/workflows/tests.yml` : sur chaque PR et chaque push vers `main`, Python 3.10 et 3.12, installation de `requirements.txt`, 17 tests unitaires, test rapide de la commande `check` sur `samples/`. |
 | `33d953d` | Commit de fusion de la PR #1 dans `main` (fait par l'utilisateur, 2026-09-30 01:01 UTC). |
 
-`b93fcc3` est aussi le point de départ de `main` (branche créée pour permettre la PR). Les commits suivants sont dans `main` via la PR #1. L'ancienne branche `claude/nice-brahmagupta-07pin6` a été supprimée sur GitHub après la fusion.
+`b93fcc3` est aussi le point de départ de `main` (branche créée pour permettre la PR). Les commits suivants sont dans `main` via la PR #1. L'ancienne branche `claude/nice-linnaeus-07pin6` a été supprimée sur GitHub après la fusion.
 
 **Commandes du prototype** :
 ```
@@ -118,9 +120,9 @@ Entrées acceptées : `.pdf`, `.md`, `.txt`.
 - Lecture du PDF de l'article : outil de lecture refusé (`pdftoppm` absent) ; `pip install pypdf` ; puis `pip install cffi` (voir erreurs) ; extraction du texte avec pypdf (32 pages, ~31 600 caractères) dans le répertoire scratchpad de la session.
 - Tentative `apt-get install -y poppler-utils` (sortie masquée, échec apparent : `which pdftotext` ne renvoie rien).
 - Recherches web et lectures de pages GitHub (dépôt Proxy-Pointer, `config.py`, `build_pp_index.py`, `pp_rag_bot.py`, issues PageIndex, README brut).
-- Création de fichiers, `python3 -m unittest`, `git add/commit/push -u origin claude/nice-brahmagupta-07pin6` (deux fois), génération de PDF de test dans le scratchpad (non versionnés).
-- Après le premier handoff : `git push origin b93fcc3:refs/heads/main` (création de `main`), création de la PR #1 en brouillon (`main` <- `claude/nice-brahmagupta-07pin6`), ajout et push du workflow `tests.yml` (testé en local avec des environnements virtuels Python 3.10 et 3.12), lecture des vérifications de la PR et de l'état des branches via l'API GitHub. La fusion, la suppression de branche, le changement de branche par défaut et le ruleset ont été faits par l'utilisateur.
-- Pour cette mise à jour : `git checkout -B claude/nice-brahmagupta-07pin6 origin/main` (repartir de `main` après fusion), édition de ce fichier, nouvelle PR.
+- Création de fichiers, `python3 -m unittest`, `git add/commit/push -u origin claude/nice-linnaeus-07pin6` (deux fois), génération de PDF de test dans le scratchpad (non versionnés).
+- Après le premier handoff : `git push origin b93fcc3:refs/heads/main` (création de `main`), création de la PR #1 en brouillon (`main` <- `claude/nice-linnaeus-07pin6`), ajout et push du workflow `tests.yml` (testé en local avec des environnements virtuels Python 3.10 et 3.12), lecture des vérifications de la PR et de l'état des branches via l'API GitHub. La fusion, la suppression de branche, le changement de branche par défaut et le ruleset ont été faits par l'utilisateur.
+- Pour cette mise à jour : `git checkout -B claude/nice-linnaeus-07pin6 origin/main` (repartir de `main` après fusion), édition de ce fichier, nouvelle PR.
 
 ## 6. Erreurs rencontrées et résolutions
 
@@ -186,7 +188,7 @@ Entrées acceptées : `.pdf`, `.md`, `.txt`.
 
 ## 10. Notes pour la reprise dans Claude Desktop
 
-- Le travail est fusionné dans `main` (PR #1). L'ancienne branche `claude/nice-brahmagupta-07pin6` a été supprimée sur GitHub : ne plus y pousser sans la recréer depuis `main`.
+- Le travail est fusionné dans `main` (PR #1). L'ancienne branche `claude/nice-linnaeus-07pin6` a été supprimée sur GitHub : ne plus y pousser sans la recréer depuis `main`.
 - Ne créer une PR que sur demande explicite de l'utilisateur ; `main` étant protégée, aucun push direct n'est possible.
 - Ne pas inclure d'identifiant de modèle dans les commits, PR ou fichiers du dépôt.
 - Les commits de la session portent un trailer `Co-Authored-By` (Claude) et un trailer `Claude-Session` (lien de la session cloud `session_0157bP12DqiLxdHpemDXcCJQ`). À adapter à la nouvelle session (**À vérifier**).
