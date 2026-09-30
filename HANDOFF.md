@@ -3,6 +3,8 @@
 Date de la session : 2026-09-29. Langue de travail de l'utilisateur : français.
 Ce document résume toute la conversation. Les éléments non connus sont marqués **À vérifier**.
 
+> **Mise à jour du 2026-09-30** : la PR de test #1 a été fusionnée dans `main` (branche par défaut, protégée) et l'ancienne branche de travail a été supprimée sur GitHub. Voir §4 (commits), la section « État GitHub » et §8-§10. Les sections 1 à 3 décrivent l'historique initial de la session.
+
 ---
 
 ## 1. Objectif du projet
@@ -66,18 +68,21 @@ Python 3.11, **aucune dépendance obligatoire** ; `pypdf` uniquement pour lire l
 - **Choix techniques du prototype** : pas de FAISS ni d'embeddings pour l'instant (BM25 maison) ; pas de LLM ; `Judge` remplaçable par un juge LLM qui renverrait les mêmes champs ; `Quote.from_text` prévu pour rejeter les citations inventées ; ABSENT signifie "motif non trouvé", pas preuve d'absence ; une valeur chiffrée différente n'est jamais CONFORME.
 - **Lecteur PDF** : pypdf, PDF avec couche texte uniquement (scans refusés, OCR non intégré), test avec un générateur PDF maison pour éviter une dépendance de test.
 - **Sécurité** (deux lectures proposées à l'utilisateur, aucune confirmation reçue) : (A) sécurité du système (où partent les documents, chiffrement, contrôle d'accès, injection de prompt, cloisonnement), (B) exigences de sécurité **dans** les documents (ISO 27001, RGPD, chiffrement, notification d'incident...). Le prototype implémente (B) via la checklist `security` ; (A) n'est pas implémenté.
-- Aucune PR créée, sur instruction du cadre de la session (seulement sur demande explicite).
+- Aucune PR créée sans demande explicite. Une PR **de test** a ensuite été demandée par l'utilisateur (base `main` créée pour l'occasion, PR en brouillon), puis fusionnée par l'utilisateur (voir §4).
 
 ## 4. Modifications déjà réalisées
 
-**Git** : dépôt `franc015/app1`, branche `claude/nice-brahmagupta-07pin6`, suivie sur `origin`. Le dépôt était vide au départ (aucun commit).
+**Git** : dépôt `franc015/app1`. Le dépôt était vide au départ (aucun commit). Le travail a été fait sur `claude/nice-brahmagupta-07pin6`, puis fusionné dans `main` par la PR #1.
 
 | Commit | Contenu |
 |---|---|
 | `b93fcc3` | Prototype `ppcheck` complet (structure, index, exigences, vérification, complétude, renvois, rapports, CLI, exemples, tests, README). |
 | `ebef08e` | Lecteur PDF (`pdfread.py`), commande `pdf2txt`, `requirements.txt`, tests PDF, correctif d'abréviations, message propre pour fichier introuvable, mise à jour du README. |
+| `5273752` | Ajout de ce fichier `HANDOFF.md` (première version). |
+| `1e64c1d` | Workflow GitHub Actions `.github/workflows/tests.yml` : sur chaque PR et chaque push vers `main`, Python 3.10 et 3.12, installation de `requirements.txt`, 17 tests unitaires, test rapide de la commande `check` sur `samples/`. |
+| `33d953d` | Commit de fusion de la PR #1 dans `main` (fait par l'utilisateur, 2026-09-30 01:01 UTC). |
 
-Les deux commits sont poussés (`git status` : branche à jour avec `origin`). Arbre de travail propre avant la création de ce fichier.
+`b93fcc3` est aussi le point de départ de `main` (branche créée pour permettre la PR). Les commits suivants sont dans `main` via la PR #1. L'ancienne branche `claude/nice-brahmagupta-07pin6` a été supprimée sur GitHub après la fusion.
 
 **Commandes du prototype** :
 ```
@@ -98,7 +103,15 @@ Entrées acceptées : `.pdf`, `.md`, `.txt`.
 - `check` : R001 A VERIFIER (99,9 % vs 99,5 %), R002 PARTIEL, R003 A VERIFIER (24 h/24 vs 9h-18h), R004 ABSENT (ISO 27001), R005 A VERIFIER (TLS 1.2 vs 1.3), R006 ABSENT (notification d'incident), R007 ABSENT (hébergement UE), R008 CONFORME, R009 CONFORME.
 - `completeness --checklist contract` sur `contrat.md` : 12/18 trouvés (6 absents : recette, propriété intellectuelle, assurance, sous-traitance, force majeure, réversibilité).
 - `refs` : articles 12 et 25 introuvables ; l'article 1240 du Code civil n'est pas signalé.
-- Tests : 17 tests, tous OK.
+- Tests : 17 tests, tous OK en local et en CI (`unittest (3.10)` et `unittest (3.12)` : succès sur la PR #1).
+
+## État GitHub (au 2026-09-30)
+
+- Dépôt public `franc015/app1`, branche par défaut : `main` (l'utilisateur l'a changée depuis les paramètres).
+- `main` est signalée protégée (`protected: true` via l'API GitHub). Le **contenu exact des règles (PR obligatoire, vérifications obligatoires, force push et suppression interdits) : À vérifier** dans Settings > Rules > Rulesets ; l'API lue n'expose pas ces détails.
+- Vérifications de la CI : `unittest (3.10)` et `unittest (3.12)` (workflow `tests`).
+- Tout changement passe par une branche et une PR vers `main`. Le message « Applies to 0 targets » affiché à la création du ruleset était trompeur : la protection est bien active.
+- PR #1 fusionnée, aucun ticket ni PR ouvert avant cette mise à jour.
 
 ## 5. Commandes exécutées (hors prototype)
 
@@ -106,6 +119,8 @@ Entrées acceptées : `.pdf`, `.md`, `.txt`.
 - Tentative `apt-get install -y poppler-utils` (sortie masquée, échec apparent : `which pdftotext` ne renvoie rien).
 - Recherches web et lectures de pages GitHub (dépôt Proxy-Pointer, `config.py`, `build_pp_index.py`, `pp_rag_bot.py`, issues PageIndex, README brut).
 - Création de fichiers, `python3 -m unittest`, `git add/commit/push -u origin claude/nice-brahmagupta-07pin6` (deux fois), génération de PDF de test dans le scratchpad (non versionnés).
+- Après le premier handoff : `git push origin b93fcc3:refs/heads/main` (création de `main`), création de la PR #1 en brouillon (`main` <- `claude/nice-brahmagupta-07pin6`), ajout et push du workflow `tests.yml` (testé en local avec des environnements virtuels Python 3.10 et 3.12), lecture des vérifications de la PR et de l'état des branches via l'API GitHub. La fusion, la suppression de branche, le changement de branche par défaut et le ruleset ont été faits par l'utilisateur.
+- Pour cette mise à jour : `git checkout -B claude/nice-brahmagupta-07pin6 origin/main` (repartir de `main` après fusion), édition de ce fichier, nouvelle PR.
 
 ## 6. Erreurs rencontrées et résolutions
 
@@ -123,6 +138,8 @@ Entrées acceptées : `.pdf`, `.md`, `.txt`.
 | Validation PDF manuelle faussée par mon script (lignes tronquées à 95 caractères) | Refait avec `textwrap` ; résultats identiques au Markdown. |
 | Découverte tests : `unittest discover -s tests` ne trouve pas `tests.pdfmaker` | Lancer avec `-t .` (`python3 -m unittest discover -s tests -t .`). |
 | Rectificatif : j'avais annoncé 7 clauses absentes sur 18 dans le contrat d'exemple | Le bon chiffre est 6 (après correction du motif "juridiction"). |
+| Aucune branche de base pour la PR de test : le distant ne contenait que la branche de travail, devenue branche par défaut | Création de `main` sur `b93fcc3` (choix de l'utilisateur), puis l'utilisateur a mis `main` en branche par défaut. |
+| Page de création du ruleset : « This ruleset does not target any resources » puis « Applies to 0 targets » alors que la cible « Include default branch » était ajoutée | Affichage trompeur avant enregistrement : après création, `main` est bien `protected: true`. |
 
 ## 7. Tâches restantes
 
@@ -135,11 +152,13 @@ Entrées acceptées : `.pdf`, `.md`, `.txt`.
 7. Gestion des sections très longues (plafond de contexte / repli sur sous-nœuds) : non implémentée.
 8. Sécurité du système (option A section 3) : chiffrement au repos, contrôle d'accès, journalisation, cloisonnement : non implémentée.
 9. Améliorations possibles : détection des titres non numérotés, seuils sens (minimum/maximum), synonymes.
-10. Si souhaité : créer une **pull request** (non demandé jusqu'ici).
+10. Pull request : **faite** (PR #1 fusionnée). Toute nouvelle modification passe par une nouvelle branche et une PR vers `main`.
 
 ## 8. Points à vérifier
 
-- **PR** : l'utilisateur a dit "Je vérifie la PR". Aucune PR n'a été créée par cette session. **À vérifier** s'il s'agit d'une PR ouverte de son côté.
+- **PR** : la PR #1 est fusionnée. Cette mise à jour de `HANDOFF.md` fait l'objet d'une nouvelle PR (voir le dépôt pour son état).
+- Contenu exact du ruleset de `main` (règles actives, contournement par les administrateurs) : **À vérifier** dans les paramètres GitHub.
+- Résultat de la CI après la fusion, sur le push vers `main` : **À vérifier**.
 - Le fichier PDF de l'article est dans `/root/.claude/uploads/15b6b364-668e-58ad-8e34-2e80e6704af0/` du conteneur cloud (**pas dans le dépôt**, probablement absent de la session Desktop). Le texte extrait était dans le scratchpad du conteneur (non versionné).
 - Le plan de session `/root/.claude/plans/root-claude-uploads-15b6b364-668e-58ad-wiggly-milner.md` existe dans le conteneur uniquement (non versionné, non essentiel).
 - Interprétation de "vérification de sécurité" (A système vs B contenu des documents) : **À vérifier** avec l'utilisateur.
@@ -153,20 +172,21 @@ Entrées acceptées : `.pdf`, `.md`, `.txt`.
 
 ## 9. Prochaine action recommandée
 
-1. Cloner le dépôt et basculer sur la branche :
+1. Cloner le dépôt (la branche par défaut est `main`) :
    ```
    git clone https://github.com/franc015/app1.git
-   cd app1 && git checkout claude/nice-brahmagupta-07pin6
+   cd app1
    pip install -r requirements.txt
    python3 -m unittest discover -s tests -t .
    python3 -m ppcheck check samples/cahier_des_charges.md samples/offre.md
    ```
+   Pour modifier le code : créer une nouvelle branche depuis `main` (`git checkout -b <nom>`), pousser, puis ouvrir une PR (`main` est protégée).
 2. Fournir 1 à 3 **vrais PDF** (anonymisés si besoin) et exécuter `python3 -m ppcheck pdf2txt fichier.pdf` pour contrôler l'extraction, puis `outline`, `completeness`, `refs`.
 3. Répondre aux questions ouvertes de la section 8 (type de PDF, langue, volume, LLM autorisé, sens de "sécurité"), puis décider : brancher le juge LLM (tâche 2) ou d'abord le jeu d'évaluation (tâche 4). **Recommandation** : commencer par le test sur vrais documents, puis le jeu d'évaluation, avant d'ajouter un LLM.
 
 ## 10. Notes pour la reprise dans Claude Desktop
 
-- Les commits sont sur `origin/claude/nice-brahmagupta-07pin6` ; le travail n'est pas fusionné dans une branche principale (la branche principale du dépôt : **À vérifier**).
-- Respecter la contrainte de la session : ne pas créer de PR sans demande explicite.
+- Le travail est fusionné dans `main` (PR #1). L'ancienne branche `claude/nice-brahmagupta-07pin6` a été supprimée sur GitHub : ne plus y pousser sans la recréer depuis `main`.
+- Ne créer une PR que sur demande explicite de l'utilisateur ; `main` étant protégée, aucun push direct n'est possible.
 - Ne pas inclure d'identifiant de modèle dans les commits, PR ou fichiers du dépôt.
 - Les commits de la session portent un trailer `Co-Authored-By` (Claude) et un trailer `Claude-Session` (lien de la session cloud `session_0157bP12DqiLxdHpemDXcCJQ`). À adapter à la nouvelle session (**À vérifier**).
