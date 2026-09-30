@@ -6,6 +6,7 @@ from . import report
 from .completeness import check_completeness
 from .checklists import CHECKLISTS
 from .document import Document
+from .pdfread import PdfError, pdf_to_text_file, read_pdf
 from .refs import dangling_refs
 from .requirements import extract_requirements
 from .verify import check
@@ -13,9 +14,18 @@ from .verify import check
 
 def load(path: str) -> Document:
     p = Path(path)
-    if p.suffix.lower() not in {".md", ".txt"}:
-        sys.exit(f"{path}: prototype reads .md/.txt only (convert PDFs to Markdown first).")
-    return Document(p.stem, p.read_text(encoding="utf-8"))
+    ext = p.suffix.lower()
+    if ext == ".pdf":
+        try:
+            return Document(p.stem, read_pdf(p))
+        except PdfError as e:
+            sys.exit(str(e))
+    if ext not in {".md", ".txt"}:
+        sys.exit(f"{path}: formats acceptes : .pdf, .md, .txt")
+    try:
+        return Document(p.stem, p.read_text(encoding="utf-8"))
+    except OSError as e:
+        sys.exit(f"{path}: {e.strerror}")
 
 
 def main(argv=None):
@@ -27,6 +37,8 @@ def main(argv=None):
     m.add_argument("doc"); m.add_argument("--checklist", choices=[*CHECKLISTS, "all"], default="all")
     r = sub.add_parser("refs", help="dangling cross-references")
     r.add_argument("doc")
+    t = sub.add_parser("pdf2txt", help="extract a PDF to text (page breaks = form feed) to inspect the extraction")
+    t.add_argument("pdf"); t.add_argument("-o", "--out")
     o = sub.add_parser("outline", help="print the section tree")
     o.add_argument("doc")
     a = ap.parse_args(argv)
@@ -42,6 +54,11 @@ def main(argv=None):
     elif a.cmd == "refs":
         doc = load(a.doc)
         print(report.refs_md(dangling_refs(doc), doc))
+    elif a.cmd == "pdf2txt":
+        try:
+            print(pdf_to_text_file(a.pdf, a.out))
+        except PdfError as e:
+            sys.exit(str(e))
     else:
         doc = load(a.doc)
         for s in doc.sections:

@@ -167,7 +167,7 @@ class Document:
             pieces, last = [], 0
             for m in RE_SENT.finditer(txt):
                 before = txt[last:m.start()].rsplit(None, 1)
-                word = before[-1].rstrip(".").lower() if before else ""
+                word = re.sub(r"\W", "", before[-1]).lower() if before else ""
                 if word in ABBREV:
                     continue
                 pieces.append((last, m.start()))

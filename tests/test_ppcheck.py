@@ -33,6 +33,8 @@ class StructureTests(unittest.TestCase):
         d = Document("x", "# T\nVoir art. 12 pour le detail. Autre phrase.")
         sents = [d.slice(s) for s in d.sentences(d.sections[1])]
         self.assertEqual(sents, ["Voir art. 12 pour le detail.", "Autre phrase."])
+        d = Document("x", "# T\nManquement grave (art. 40). Suite.")
+        self.assertEqual([d.slice(s) for s in d.sentences(d.sections[1])], ["Manquement grave (art. 40).", "Suite."])
 
     def test_quote_verify_detects_altered_claim(self):
         d = load("offre.md")
