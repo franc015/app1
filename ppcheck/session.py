@@ -43,7 +43,7 @@ def load(path) -> dict:
     """Resume un journal JSONL : identite, modele, messages, jetons, contexte courant."""
     info = {"fichier": str(path), "messages": {"user": 0, "assistant": 0}, "outils": {},
             "jetons": {"entree": 0, "cache_lecture": 0, "cache_ecriture": 0, "sortie": 0},
-            "modeles": [], "contexte": None}
+            "modeles": [], "contexte": None, "par_modele": {}}
     seen = set()
     try:
         lines = Path(path).read_text(encoding="utf-8").splitlines()
@@ -76,6 +76,12 @@ def load(path) -> dict:
             if u and key not in seen:
                 seen.add(key)
                 j = info["jetons"]
+                pm = info["par_modele"].setdefault(m.get("model") or "?", {"requetes": 0, **dict.fromkeys(j, 0)})
+                pm["requetes"] += 1
+                pm["entree"] += u.get("input_tokens", 0)
+                pm["cache_lecture"] += u.get("cache_read_input_tokens", 0)
+                pm["cache_ecriture"] += u.get("cache_creation_input_tokens", 0)
+                pm["sortie"] += u.get("output_tokens", 0)
                 j["entree"] += u.get("input_tokens", 0)
                 j["cache_lecture"] += u.get("cache_read_input_tokens", 0)
                 j["cache_ecriture"] += u.get("cache_creation_input_tokens", 0)
@@ -84,6 +90,10 @@ def load(path) -> dict:
                                     + u.get("cache_creation_input_tokens", 0))
     info["env"] = {k: os.environ[k] for k in ENV_KEYS if k in os.environ}
     return info
+
+
+def _n(v):
+    return f"{v:,}".replace(",", " ")
 
 
 def render(info: dict, window=None) -> str:
@@ -108,6 +118,14 @@ def render(info: dict, window=None) -> str:
     j = info["jetons"]
     out += ["", "## Jetons cumules (par requete distincte)"]
     out += [f"- {k.replace('_', ' ')} : {v:,}".replace(",", " ") for k, v in j.items()]
+    entrants = j["entree"] + j["cache_lecture"] + j["cache_ecriture"]
+    out += [f"- **total entrant** : {_n(entrants)}", f"- **total (entrant + sortie)** : {_n(entrants + j['sortie'])}"]
+    if entrants:
+        out.append(f"- part servie par le cache : {100 * j['cache_lecture'] / entrants:.1f} %")
+    if len(info["par_modele"]) > 0:
+        out += ["", "## Par modele", "", "| Modele | Requetes | Entree | Cache lect. | Cache ecr. | Sortie |", "|---|---|---|---|---|---|"]
+        for k, v in info["par_modele"].items():
+            out.append(f"| {k} | {v['requetes']} | {_n(v['entree'])} | {_n(v['cache_lecture'])} | {_n(v['cache_ecriture'])} | {_n(v['sortie'])} |")
     if info["outils"]:
         out += ["", "## Appels d'outils"]
         out += [f"- {k} : {v}" for k, v in sorted(info["outils"].items(), key=lambda kv: -kv[1])]
