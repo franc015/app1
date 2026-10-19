@@ -1,9 +1,8 @@
 import argparse
-import json
 import sys
 from pathlib import Path
 
-from . import report, session
+from . import report
 from .completeness import check_completeness
 from .checklists import CHECKLISTS
 from .document import Document
@@ -42,12 +41,6 @@ def main(argv=None):
     t.add_argument("pdf"); t.add_argument("-o", "--out")
     o = sub.add_parser("outline", help="print the section tree")
     o.add_argument("doc")
-    s = sub.add_parser("session", help="show Claude Code session data and context usage")
-    s.add_argument("--id", help="session id (default: CLAUDE_CODE_SESSION_ID, else latest)")
-    s.add_argument("--file", help="path to a session .jsonl transcript")
-    s.add_argument("--window", type=int, help="context window size in tokens, to show a percentage")
-    s.add_argument("--turns", action="store_true", help="token consumption per request")
-    s.add_argument("--json", action="store_true")
     a = ap.parse_args(argv)
 
     if a.cmd == "check":
@@ -61,12 +54,6 @@ def main(argv=None):
     elif a.cmd == "refs":
         doc = load(a.doc)
         print(report.refs_md(dangling_refs(doc), doc))
-    elif a.cmd == "session":
-        try:
-            info = session.load(a.file or session.find_transcript(a.id))
-        except session.SessionError as e:
-            sys.exit(str(e))
-        print(json.dumps(info, ensure_ascii=False, indent=2) if a.json else session.render(info, a.window, a.turns))
     elif a.cmd == "pdf2txt":
         try:
             print(pdf_to_text_file(a.pdf, a.out))

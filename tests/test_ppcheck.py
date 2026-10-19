@@ -100,22 +100,3 @@ class CompletenessTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-
-
-class SessionTest(unittest.TestCase):
-    def test_load_and_render(self):
-        import json, tempfile
-        from ppcheck import session
-        rows = [
-            {"type": "user", "sessionId": "s1", "timestamp": "t0", "message": {"role": "user", "content": "hi"}},
-            {"type": "assistant", "sessionId": "s1", "requestId": "r1", "timestamp": "t1",
-             "message": {"model": "m1", "content": [{"type": "tool_use", "name": "Bash"}],
-                         "usage": {"input_tokens": 2, "cache_read_input_tokens": 90,
-                                   "cache_creation_input_tokens": 8, "output_tokens": 5}}},
-        ]
-        with tempfile.NamedTemporaryFile("w", suffix=".jsonl", delete=False) as f:
-            f.write("\n".join(json.dumps(r) for r in rows) + "\nnot json\n")
-        info = session.load(f.name)
-        self.assertEqual(info["contexte"], 100)
-        self.assertEqual(info["outils"], {"Bash": 1})
-        self.assertIn("(10.0 %)", session.render(info, 1000))
