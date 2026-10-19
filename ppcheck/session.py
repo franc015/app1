@@ -43,7 +43,7 @@ def load(path) -> dict:
     """Resume un journal JSONL : identite, modele, messages, jetons, contexte courant."""
     info = {"fichier": str(path), "messages": {"user": 0, "assistant": 0}, "outils": {},
             "jetons": {"entree": 0, "cache_lecture": 0, "cache_ecriture": 0, "sortie": 0},
-            "modeles": [], "contexte": None, "par_modele": {}}
+            "modeles": [], "contexte": None, "tours": [], "par_modele": {}}
     seen = set()
     try:
         lines = Path(path).read_text(encoding="utf-8").splitlines()
@@ -75,6 +75,10 @@ def load(path) -> dict:
             key = d.get("requestId") or d.get("uuid")
             if u and key not in seen:
                 seen.add(key)
+                info["tours"].append({"heure": d.get("timestamp"), "modele": m.get("model"),
+                                      "entree": u.get("input_tokens", 0) + u.get("cache_read_input_tokens", 0)
+                                      + u.get("cache_creation_input_tokens", 0),
+                                      "sortie": u.get("output_tokens", 0)})
                 j = info["jetons"]
                 pm = info["par_modele"].setdefault(m.get("model") or "?", {"requetes": 0, **dict.fromkeys(j, 0)})
                 pm["requetes"] += 1
@@ -96,7 +100,7 @@ def _n(v):
     return f"{v:,}".replace(",", " ")
 
 
-def render(info: dict, window=None) -> str:
+def render(info: dict, window=None, turns=False) -> str:
     out = ["# Session Claude Code", ""]
     rows = [("Session", info.get("session_id")), ("Version", info.get("version")),
             ("Point d'entree", info.get("point_entree")), ("Repertoire", info.get("cwd")),
@@ -126,6 +130,9 @@ def render(info: dict, window=None) -> str:
         out += ["", "## Par modele", "", "| Modele | Requetes | Entree | Cache lect. | Cache ecr. | Sortie |", "|---|---|---|---|---|---|"]
         for k, v in info["par_modele"].items():
             out.append(f"| {k} | {v['requetes']} | {_n(v['entree'])} | {_n(v['cache_lecture'])} | {_n(v['cache_ecriture'])} | {_n(v['sortie'])} |")
+    if turns:
+        out += ["", "## Consommation par requete", "", "| # | Heure | Entree | Sortie |", "|---|---|---|---|"]
+        out += [f"| {i} | {t['heure']} | {_n(t['entree'])} | {_n(t['sortie'])} |" for i, t in enumerate(info["tours"], 1)]
     if info["outils"]:
         out += ["", "## Appels d'outils"]
         out += [f"- {k} : {v}" for k, v in sorted(info["outils"].items(), key=lambda kv: -kv[1])]

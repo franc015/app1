@@ -46,6 +46,7 @@ def main(argv=None):
     s.add_argument("--id", help="session id (default: CLAUDE_CODE_SESSION_ID, else latest)")
     s.add_argument("--file", help="path to a session .jsonl transcript")
     s.add_argument("--window", type=int, help="context window size in tokens, to show a percentage")
+    s.add_argument("--turns", action="store_true", help="token consumption per request")
     s.add_argument("--json", action="store_true")
     a = ap.parse_args(argv)
 
@@ -65,7 +66,7 @@ def main(argv=None):
             info = session.load(a.file or session.find_transcript(a.id))
         except session.SessionError as e:
             sys.exit(str(e))
-        print(json.dumps(info, ensure_ascii=False, indent=2) if a.json else session.render(info, a.window))
+        print(json.dumps(info, ensure_ascii=False, indent=2) if a.json else session.render(info, a.window, a.turns))
     elif a.cmd == "pdf2txt":
         try:
             print(pdf_to_text_file(a.pdf, a.out))
