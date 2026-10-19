@@ -18,6 +18,7 @@ python3 -m ppcheck check samples/cahier_des_charges.md samples/offre.md [--json]
 python3 -m ppcheck completeness samples/contrat.md --checklist contract|security|all
 python3 -m ppcheck refs samples/contrat.md
 python3 -m ppcheck pdf2txt contrat.pdf
+python3 -m ppcheck session [--id ID | --file journal.jsonl] [--window N] [--json]
 python3 -m unittest discover -s tests -t .
 ```
 Entrees : `.pdf`, `.md`, `.txt` (un saut de page `\f` est compte comme changement de page).
